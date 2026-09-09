@@ -1,5 +1,5 @@
 /*
-pm_math.h - CSMoE Foundation : mathlib.h replacement for modern C++
+pm_math.h - Engine math helpers
 Copyright (C) 2019 Moemod Hymei
 
 This program is free software: you can redistribute it and/or modify
