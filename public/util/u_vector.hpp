@@ -1,5 +1,5 @@
 /*
-u_vector.hpp - CSMoE Foundation : Vector
+u_vector.hpp - Engine foundation: Vector
 Copyright (C) 2019 Moemod Yanase
 
 This program is free software: you can redistribute it and/or modify
