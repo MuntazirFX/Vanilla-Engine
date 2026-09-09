@@ -5,7 +5,7 @@ DEST="$ROOT/external/hlsdk-portable"
 rm -rf "$DEST"
 mkdir -p "$ROOT/external"
 git clone --depth 1 https://github.com/FWGS/hlsdk-portable.git "$DEST"
-# CSMoE engine is linked into a single iOS binary, so game libraries must be static.
+# The vanilla Half-Life game libraries are linked statically into the iOS binary.
 python3 - "$DEST/dlls/CMakeLists.txt" "$DEST/cl_dll/CMakeLists.txt" <<'PY'
 import pathlib, sys
 for name in sys.argv[1:]:
