@@ -1,6 +1,9 @@
 project(Vanilla-Engine-Citrus)
 cmake_minimum_required(VERSION  3.10.2)
 enable_language(C CXX ASM)
+if(APPLE)
+    enable_language(OBJCXX)
+endif()
 
 # Install custom module path
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
@@ -146,35 +149,7 @@ set(XASH_LIBDL true)
 
 add_subdirectory(3rdparty EXCLUDE_FROM_ALL)
 
-if(XASH_IMGUI)
-	# TODO : since vcpkg doesn't provide with imgui_internal.h, just use our own one
-    if(XASH_VCPKG AND FALSE)
-		find_package(imgui CONFIG REQUIRED)
-		add_library(imgui INTERFACE)
-		target_link_libraries(imgui INTERFACE imgui::imgui)
-	else()
-		set(IMGUI_SRC
-				imgui/imgui_demo.cpp
-				imgui/imgui_draw.cpp
-				imgui/imgui_widgets.cpp
-				imgui/imgui.cpp)
-		add_library(imgui STATIC ${IMGUI_SRC})
-		target_include_directories(imgui PUBLIC ${CMAKE_SOURCE_DIR}/imgui)
-	endif()
-	add_library(imgui_ext STATIC 
-		imgui_ext/ImGuiFileDialog/ImGuiFileDialog.cpp
-		imgui_ext/imgui_lua/imgui_lua.cpp
-		)
-	target_include_directories(imgui_ext PUBLIC ${CMAKE_SOURCE_DIR}/imgui_ext)
-	if(WIN32)
-		target_include_directories(imgui_ext PRIVATE ${CMAKE_SOURCE_DIR}/imgui_ext/dirent)
-	endif()
-	target_link_libraries(imgui_ext PUBLIC imgui lua54_3p)
-	if(XASH_UNITY_BUILD)
-		set_target_properties(imgui PROPERTIES UNITY_BUILD ON)
-		set_target_properties(imgui_ext PROPERTIES UNITY_BUILD ON)
-	endif()
-endif()
+# Optional ImGui/Lua/VGUI layers are disabled for this vanilla build.
 
 ADD_SUBDIRECTORY(SourceSDK)
 
@@ -189,7 +164,6 @@ if(NOT XASH_DEDICATED)
     ADD_SUBDIRECTORY(mainui_cpp)
 endif()
 ADD_SUBDIRECTORY(engine)
-ADD_SUBDIRECTORY(cqmiao)
 if(NOT XASH_SINGLE_BINARY AND NOT ANDROID AND NOT IOS)
 	ADD_SUBDIRECTORY(game_launch)
 endif()
