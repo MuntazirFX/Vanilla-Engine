@@ -25,10 +25,6 @@ if(IOS OR ANDROID)
 	target_link_libraries(3rdparty-sdl2 INTERFACE SDL2main)
 endif()
 
-add_subdirectory(lua-cmake EXCLUDE_FROM_ALL)
-add_library(lua54_3p INTERFACE)
-target_link_libraries(lua54_3p INTERFACE lua_static)
-
 if(XASH_VCPKG)
 	find_package(nameof CONFIG QUIET)
 else()
