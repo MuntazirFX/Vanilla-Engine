@@ -1,0 +1,54 @@
+name: Build iOS IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          brew update
+          brew install cmake
+
+      - name: Configure
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=15.0 \
+            -DXASH_IMGUI=OFF \
+            -DXASH_VGUI2=OFF \
+            -DXASH_RAGDOLL=OFF \
+            -DXASH_DEDICATED=OFF
+
+      - name: Build
+        run: |
+          cmake --build build --config Release -j2
+
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          APP=$(find build -name "*.app" -type d | head -1)
+
+          if [ -z "$APP" ]; then
+            echo "ERROR: .app was not produced"
+            exit 1
+          fi
+
+          cp -R "$APP" Payload/
+          /usr/bin/zip -qry Vanilla-Half-Life.ipa Payload
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: Vanilla-Half-Life-IPA
+          path: Vanilla-Half-Life.ipa
