@@ -49,7 +49,7 @@ endif()
 if(XASH_IMGUI)
 	target_link_libraries(${MAINUI_LIBRARY} PRIVATE imgui imgui_ext)
 endif()
-target_link_libraries(${MAINUI_LIBRARY} PRIVATE cqmiao json_3p)
+target_link_libraries(${MAINUI_LIBRARY} PRIVATE json_3p)
 
 if(XASH_SAILFISH)
 	add_definitions(-D__SAILFISH__)
