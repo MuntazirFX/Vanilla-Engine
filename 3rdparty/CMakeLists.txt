@@ -1,0 +1,262 @@
+cmake_minimum_required(VERSION 3.10.2)
+
+#add_library(hidapi_3p INTERFACE)
+#set(BUILD_SHARED_LIBS OFF)
+#set(HIDAPI_BUILD_HIDTEST OFF)
+#add_subdirectory(hidapi EXCLUDE_FROM_ALL)
+#target_link_libraries(hidapi_3p INTERFACE hidapi::hidapi)
+
+add_library(3rdparty-sdl2 INTERFACE)
+if(MSVC)
+	add_definitions(-D_ftol2_sse=SDL_ftol2_sse) # fix x86 compile
+endif()
+if(XASH_ANGLE)
+	set(VIDEO_OPENGL OFF CACHE BOOL "" FORCE) # use opengl es2 instead
+	set(VIDEO_OPENGLES OFF CACHE BOOL "" FORCE) # use opengl es2 instead
+endif()
+set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+set(DIRECTX OFF CACHE BOOL "" FORCE) # win10 arm dont have dx8
+set(LIBC ON CACHE BOOL "" FORCE) # win10 arm dont have dx8
+set(HIDAPI OFF CACHE BOOL "" FORCE) # win10 arm dont have dx8
+set(SDL_CMAKE_DEBUG_POSTFIX "" CACHE STRING "" FORCE)
+add_subdirectory(sdl2 EXCLUDE_FROM_ALL)
+target_link_libraries(3rdparty-sdl2 INTERFACE SDL2-static)
+if(IOS OR ANDROID)
+	target_link_libraries(3rdparty-sdl2 INTERFACE SDL2main)
+endif()
+
+add_subdirectory(lua-cmake EXCLUDE_FROM_ALL)
+add_library(lua54_3p INTERFACE)
+target_link_libraries(lua54_3p INTERFACE lua_static)
+
+if(XASH_VCPKG)
+	find_package(nameof CONFIG QUIET)
+else()
+	add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/nameof EXCLUDE_FROM_ALL)
+endif()
+add_library(nameof_3p INTERFACE)
+target_link_libraries(nameof_3p INTERFACE nameof::nameof)
+
+if(XASH_VCPKG)
+	find_package(cpuinfo CONFIG QUIET)
+	add_library(cpuinfo_3p INTERFACE)
+	target_link_libraries(cpuinfo_3p INTERFACE cpuinfo::cpuinfo)
+else()
+	set(CPUINFO_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
+	set(CPUINFO_BUILD_UNIT_TESTS OFF CACHE BOOL "" FORCE)
+	set(CPUINFO_BUILD_MOCK_TESTS OFF CACHE BOOL "" FORCE)
+	set(CPUINFO_BUILD_BENCHMARKS OFF CACHE BOOL "" FORCE)
+	set(CPUINFO_BUILD_PKG_CONFIG OFF CACHE BOOL "" FORCE)
+	set(CPUINFO_LIBRARY_TYPE "static" CACHE STRING "" FORCE)
+	add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/cpuinfo)
+	add_library(cpuinfo_3p INTERFACE)
+	target_link_libraries(cpuinfo_3p INTERFACE cpuinfo)
+endif()
+
+if(XASH_VCPKG)
+	find_path(XORSTR_INCLUDE_DIRS "xorstr.hpp")
+	add_library(xorstr_3p INTERFACE)
+    target_include_directories(xorstr_3p INTERFACE ${XORSTR_INCLUDE_DIRS})
+else()
+	add_library(xorstr_3p INTERFACE)
+    target_include_directories(xorstr_3p INTERFACE "${CMAKE_SOURCE_DIR}/3rdparty/xorstr/include")
+endif()
+
+add_library(qrcode INTERFACE)
+target_sources(qrcode INTERFACE ${CMAKE_SOURCE_DIR}/3rdparty/QRCode/QRCode.cpp)
+target_include_directories(qrcode INTERFACE ${CMAKE_SOURCE_DIR}/3rdparty/QRCode)
+
+set(FETCHCONTENT_SOURCE_DIR_BOOST ${CMAKE_SOURCE_DIR}/3rdparty/boost_1_77_0)
+add_subdirectory(boost-cmake EXCLUDE_FROM_ALL)
+
+add_library(Boost::pfr ALIAS Boost::boost)
+add_library(Boost::preprocessor ALIAS Boost::boost)
+add_library(Boost::asio ALIAS Boost::boost)
+add_library(Boost::beast ALIAS Boost::boost)
+
+add_library(3rdparty-boost-mysql INTERFACE)
+target_include_directories(3rdparty-boost-mysql INTERFACE ${CMAKE_SOURCE_DIR}/3rdparty/boost-mysql/include)
+add_library(Boost::mysql ALIAS 3rdparty-boost-mysql)
+
+add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/openssl-cmake EXCLUDE_FROM_ALL)
+add_library(openssl_3p INTERFACE)
+target_link_libraries(openssl_3p INTERFACE ssl crypto)
+
+set(JSON_BuildTests OFF)
+set(JSON_MultipleHeaders ON)
+add_subdirectory(json EXCLUDE_FROM_ALL)
+add_library(json_3p INTERFACE)
+target_link_libraries(json_3p INTERFACE nlohmann_json::nlohmann_json)
+
+set(UNITTEST OFF)
+set(CLI OFF)
+set(DIAGNOSTICS OFF)
+set(UNIVERSAL_BUILD OFF)
+set(ISA_NATIVE ON)
+add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/astc-encoder EXCLUDE_FROM_ALL)
+add_library(astcenc_3p INTERFACE)
+target_link_libraries(astcenc_3p INTERFACE astcenc-native-static)
+
+# find system zlib first
+find_package(ZLIB)
+add_library(3rdparty-zlib INTERFACE)
+if(${ZLIB_FOUND})
+	target_link_libraries(3rdparty-zlib INTERFACE ZLIB::ZLIB)
+else()
+	add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/zlib EXCLUDE_FROM_ALL)
+	target_link_libraries(3rdparty-zlib INTERFACE zlibstatic)
+
+	set(ZLIB_FOUND ON CACHE BOOL "" FORCE)
+	set(ZLIB_LIBRARIES zlibstatic)
+	set(ZLIB_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/3rdparty/zlib ${CMAKE_BINARY_DIR}/3rdparty/zlib)
+
+	target_include_directories(3rdparty-zlib INTERFACE ${ZLIB_INCLUDE_DIRS})
+endif()
+
+set(PNG_SHARED OFF CACHE BOOL "" FORCE)
+set(PNG_STATIC ON CACHE BOOL "" FORCE)
+set(PNG_EXECUTABLES OFF CACHE BOOL "" FORCE)
+set(PNG_TESTS OFF CACHE BOOL "" FORCE)
+set(PNG_BUILD_ZLIB ON CACHE BOOL "" FORCE)
+set(PNG_ARM_NEON "on" CACHE STRING "" FORCE)
+set(SKIP_INSTALL_ALL ON)
+add_library(3rdparty-png INTERFACE)
+add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/libpng EXCLUDE_FROM_ALL)
+target_link_libraries(3rdparty-png INTERFACE png_static)
+target_include_directories(3rdparty-png INTERFACE ${CMAKE_SOURCE_DIR}/3rdparty/libpng ${CMAKE_BINARY_DIR}/3rdparty/libpng)
+
+set(PNG_FOUND ON CACHE BOOL "" FORCE)
+set(PNG_LIBRARIES png_static)
+set(PNG_INCLUDE_DIRS ${CMAKE_SOURCE_DIR}/3rdparty/libpng ${CMAKE_BINARY_DIR}/3rdparty/libpng)
+
+set(BUILD_SHARED_LIBS OFF)
+set(BUILD_FRAMEWORK OFF)
+set(DISABLE_FORCE_DEBUG_POSTFIX ON)
+set(FT_DISABLE_PNG ON CACHE BOOL "" FORCE)
+set(FT_DISABLE_ZLIB ON CACHE BOOL "" FORCE)
+add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/freetype EXCLUDE_FROM_ALL)
+add_library(3rdparty-freetype INTERFACE)
+target_link_libraries(3rdparty-freetype INTERFACE freetype)
+target_include_directories(3rdparty-freetype INTERFACE ${CMAKE_SOURCE_DIR}/3rdparty/freetype/include)
+
+add_library(3rdparty-stb INTERFACE)
+target_include_directories(3rdparty-stb INTERFACE ${CMAKE_SOURCE_DIR}/3rdparty/stb)
+
+add_library(3rdparty-expat INTERFACE)
+set(EXPAT_SHARED_LIBS OFF)
+set(EXPAT_BUILD_DOCS OFF)
+set(EXPAT_BUILD_PKGCONFIG OFF)
+set(EXPAT_BUILD_EXAMPLES OFF)
+set(EXPAT_BUILD_TESTS OFF)
+set(EXPAT_BUILD_TOOLS OFF)
+set(EXPAT_ENABLE_INSTALL OFF)
+add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/libexpat/expat EXCLUDE_FROM_ALL)
+target_link_libraries(3rdparty-expat INTERFACE expat)
+
+if (NOT CMAKE_CROSSCOMPILING)
+	add_library(3rdparty-tbbmalloc INTERFACE)
+	set(TBB_BUILD_SHARED OFF)
+	set(TBB_BUILD_STATIC ON)
+	set(TBB_BUILD_TBBMALLOC ON)
+	set(TBB_BUILD_TBBMALLOC_PROXY OFF)
+	set(TBB_TEST OFF)
+	set(TBB_STRICT OFF)
+	add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/oneTBB/ EXCLUDE_FROM_ALL)
+	target_include_directories(3rdparty-tbbmalloc INTERFACE ${CMAKE_SOURCE_DIR}/3rdparty/oneTBB/include)
+	target_link_libraries(3rdparty-tbbmalloc INTERFACE TBB::tbb TBB::tbbmalloc)
+	target_compile_definitions(3rdparty-tbbmalloc INTERFACE -DTBB_USE_PREVIEW_BINARY=1)
+endif()
+
+#add_library(3rdparty-gl4es INTERFACE)
+#set(STATICLIB ON)
+#add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/gl4es EXCLUDE_FROM_ALL)
+#target_link_libraries(3rdparty-gl4es INTERFACE GL)
+file(GLOB GL4ES_GLESWRAP_SOURCES ${CMAKE_SOURCE_DIR}/3rdparty/gl4es/src/gl/*.c ${CMAKE_SOURCE_DIR}/3rdparty/gl4es/src/gl/*/*.c ${CMAKE_SOURCE_DIR}/3rdparty/gl4es/src/glx/hardext.c)
+add_library(3rdparty-gl4es STATIC ${GL4ES_GLESWRAP_SOURCES})
+target_include_directories(3rdparty-gl4es PRIVATE ${CMAKE_SOURCE_DIR}/3rdparty/gl4es/src ${CMAKE_SOURCE_DIR}/3rdparty/gl4es/src/gl ${CMAKE_SOURCE_DIR}/3rdparty/gl4es/src/glx)
+target_include_directories(3rdparty-gl4es PUBLIC ${CMAKE_SOURCE_DIR}/3rdparty/gl4es/include)
+target_compile_definitions(3rdparty-gl4es PRIVATE -DNOX11 -DNO_GBM -DNO_INIT_CONSTRUCTOR -DDEFAULT_ES=2 -DNOEGL -DEXTERNAL_GETPROCADDRESS=GL4ES_GetProcAddress -DNO_LOADER -DSTATICLIB)
+
+add_library(3rdparty-opus INTERFACE)
+add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/opus EXCLUDE_FROM_ALL)
+target_link_libraries(3rdparty-opus INTERFACE opus)
+
+set(BUILD_UNIT_TESTS OFF CACHE BOOL "" FORCE)
+set(BUILD_BULLET2_DEMOS OFF CACHE BOOL "" FORCE)
+set(BUILD_OPENGL3_DEMOS OFF CACHE BOOL "" FORCE)
+set(BUILD_CPU_DEMOS OFF CACHE BOOL "" FORCE)
+set(BUILD_EXTRAS OFF CACHE BOOL "" FORCE)
+set(BUILD_ENET OFF CACHE BOOL "" FORCE)
+set(BUILD_CLSOCKET OFF CACHE BOOL "" FORCE)
+set(USE_SOFT_BODY_MULTI_BODY_DYNAMICS_WORLD OFF)
+add_library(3rdparty-bullet3 INTERFACE)
+add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/bullet3 EXCLUDE_FROM_ALL)
+target_link_libraries(3rdparty-bullet3 INTERFACE LinearMath Bullet3Common BulletCollision BulletDynamics)
+target_include_directories(3rdparty-bullet3 INTERFACE ${CMAKE_SOURCE_DIR}/3rdparty/bullet3/src)
+
+if(MSVC)
+	set(YASM_ASSEMBLER ${CMAKE_SOURCE_DIR}/3rdparty/yasm/vsyasm-1.3.0-win64/vsyasm.exe)
+endif()
+add_library(3rdparty-mpg123 INTERFACE)
+set(BUILD_LIBOUT123 OFF CACHE BOOL "" FORCE)
+set(BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)
+set(HAVE_FPU ON CACHE BOOL "" FORCE)
+set(MPG123_SOURCE_DIR "${CMAKE_SOURCE_DIR}/3rdparty/mpg123" CACHE PATH "" FORCE)
+add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/mpg123-cmake EXCLUDE_FROM_ALL)
+target_link_libraries(3rdparty-mpg123 INTERFACE libmpg123)
+target_include_directories(3rdparty-mpg123 INTERFACE
+		${CMAKE_SOURCE_DIR}/3rdparty/mpg123/src/libmpg123
+		${CMAKE_SOURCE_DIR}/3rdparty/mpg123/src/compat
+		${CMAKE_SOURCE_DIR}/3rdparty/mpg123/src
+		${CMAKE_BINARY_DIR}/3rdparty/mpg123-cmake/src/libmpg123
+		)
+target_compile_definitions(3rdparty-mpg123 INTERFACE -DREAL_IS_FLOAT=1)
+
+if(WIN32)
+	add_library(3rdparty-mman-win32 STATIC ${CMAKE_SOURCE_DIR}/3rdparty/mman-win32/mman.c)
+	target_include_directories(3rdparty-mman-win32 PUBLIC ${CMAKE_SOURCE_DIR}/3rdparty/mman-win32)
+endif()
+
+if(XASH_ANGLE)
+	set(ANGLE_ROOT ${CMAKE_SOURCE_DIR}/3rdparty/angle)
+	set(CHROMIUM_ZLIB_ROOT ${CMAKE_SOURCE_DIR}/3rdparty/chromium-zlib)
+	set(ANGLE_SPIRV_HEADERS_ROOT ${CMAKE_SOURCE_DIR}/3rdparty/SPIRV-Headers)
+	set(ANGLE_SPIRV_TOOLS_ROOT ${CMAKE_SOURCE_DIR}/3rdparty/SPIRV-Tools)
+	set(ANGLE_SPIRV_CROSS_ROOT ${CMAKE_SOURCE_DIR}/3rdparty/SPIRV-Cross)
+	set(ANGLE_GLSLANG_ROOT ${CMAKE_SOURCE_DIR}/3rdparty/glslang)
+	set(ANGLE_WORKAROUND_FAKEOBJCSOURCE ON)
+	if(APPLE)
+		set(ANGLE_BACKEND Metal)
+	else()
+		set(ANGLE_BACKEND Vulkan)
+	endif()
+
+	add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/angle-static-cmake EXCLUDE_FROM_ALL)
+	add_library(3rdparty-angle INTERFACE)
+	target_link_libraries(3rdparty-angle INTERFACE angle_static)
+	target_include_directories(3rdparty-angle INTERFACE ${CMAKE_SOURCE_DIR}/3rdparty/angle/include)
+
+	set(SPIRV_CROSS_CLI OFF CACHE BOOL "" FORCE)
+	set(SPIRV_CROSS_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
+	add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/SPIRV-Cross EXCLUDE_FROM_ALL)
+	add_library(3rdparty-spirv_cross INTERFACE)
+	target_link_libraries(3rdparty-spirv_cross INTERFACE
+			spirv-cross-glsl
+			spirv-cross-hlsl
+			spirv-cross-cpp
+			spirv-cross-reflect
+			spirv-cross-msl
+			spirv-cross-util
+			spirv-cross-core)
+
+	set(SPIRV_TOOLS_BUILD_STATIC ON)
+	set(SPIRV-Headers_SOURCE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/SPIRV-Headers)
+	add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/SPIRV-Tools EXCLUDE_FROM_ALL)
+	add_library(3rdparty-spirv_tools INTERFACE)
+	target_link_libraries(3rdparty-spirv_tools INTERFACE SPIRV-Tools-static)
+
+	set(BUILD_SHARED_LIBS OFF)
+	add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/glslang EXCLUDE_FROM_ALL)
+	add_library(3rdparty-glslang INTERFACE)
+	target_link_libraries(3rdparty-glslang INTERFACE glslang SPIRV glslang-default-resource-limits)
+endif()
