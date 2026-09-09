@@ -183,6 +183,7 @@ if(NOT XASH_DEDICATED)
 	set(XASH_ENGINE_APPLE_SOURCES
 		common/launcher.cpp
 		platform/iOS/TapicEngine.mm
+		platform/iOS/launchdialog.mm
 		platform/ime_stub.cpp
 	)
 	else()
@@ -531,7 +532,7 @@ if(XASH_TBBMALLOC)
 	target_link_libraries(${XASH_ENGINE} PRIVATE 3rdparty-tbbmalloc)
 endif()
 
-target_link_libraries(${XASH_ENGINE} PRIVATE xorstr_3p qrcode openssl_3p lua54_3p Boost::container 3rdparty-opus 3rdparty-mpg123)
+target_link_libraries(${XASH_ENGINE} PRIVATE xorstr_3p qrcode openssl_3p Boost::container 3rdparty-opus 3rdparty-mpg123)
 
 if(WIN32)
 	target_link_libraries(${XASH_ENGINE} PRIVATE 3rdparty-mman-win32)
@@ -608,7 +609,7 @@ endif()
 if(XASH_DEDICATED)
 	if(XASH_STATIC_GAMELIB)
 		set_target_properties(${XASH_ENGINE} PROPERTIES
-				OUTPUT_NAME "csmoe_dedicated")
+				OUTPUT_NAME "xash_dedicated")
 	else()
 		set_target_properties(${XASH_ENGINE} PROPERTIES
 				OUTPUT_NAME "xash_dedicated")
@@ -625,7 +626,14 @@ set_target_properties(${XASH_ENGINE} PROPERTIES UNITY_BUILD OFF)
 
 if( NOT XASH_STATIC_GAMELIB OR XASH_SINGLE_BINARY )
 	install( TARGETS ${XASH_ENGINE} DESTINATION ".")
-	install(DIRECTORY ${CMAKE_SOURCE_DIR}/CSMoE-Full/csmoe DESTINATION "." OPTIONAL)
-	install(DIRECTORY ${CMAKE_SOURCE_DIR}/CSMoE-Full/cstrike DESTINATION "." OPTIONAL)
-	install(DIRECTORY ${CMAKE_SOURCE_DIR}/CSMoE-Full/valve DESTINATION "." OPTIONAL)
+endif()
+
+# The iOS target is the app executable itself; game data stays outside the repository.
+if(IOS AND XASH_SINGLE_BINARY)
+    set_target_properties(${XASH_ENGINE} PROPERTIES
+        OUTPUT_NAME "Vanilla-Half-Life"
+        MACOSX_BUNDLE TRUE
+        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/iOS/Info.plist"
+        XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "15.0"
+    )
 endif()

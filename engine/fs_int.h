@@ -130,7 +130,7 @@ typedef struct fs_api_s
 	void *(*_Mem_Alloc)( size_t size, const char *filename, int fileline );
 	void (*_Mem_Free)( void *data, const char *filename, int fileline );
 
-    // CSMoE ext
+    // Extended filesystem mapping API
     const void *(*FS_MapFile)( const char *path, fs_offset_t *filesizeptr, qboolean gamedironly );
 	void* (*FS_MapFileCOW)(const char* path, fs_offset_t* filesizeptr, qboolean gamedironly);
     void (*FS_MapFree)( const void *data, fs_offset_t filesize );
