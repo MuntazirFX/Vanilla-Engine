@@ -1800,7 +1800,7 @@ void Con_DrawVersion( void )
 	// draw cpu info
 	int ram = Cpu_GetInstalledRamMegaBytes();
     int y = 0;
-    Q_snprintf(curbuild, MAX_STRING, "CSMoE Xash3D %s build %d %s-%s",
+    Q_snprintf(curbuild, MAX_STRING, "Vanilla Half-Life / Xash3D %s build %d %s-%s",
                XASH_VERSION,
                Q_buildnum(),
                Q_buildos( ),

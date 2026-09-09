@@ -1260,7 +1260,7 @@ void CL_InternetServers_f( void )
 	const size_t remaining = sizeof( fullquery ) - sizeof( MS_SCAN_REQUEST );
 
 	Info_SetValueForKey( info, "nat", cl_nat->string, remaining );
-	Info_SetValueForKey( info, "gamedir", "cstrike", remaining );
+	Info_SetValueForKey( info, "gamedir", "valve", remaining );
 
 	// let master know about client version
 	Info_SetValueForKey( info, "clver", "1200", remaining );

@@ -2958,55 +2958,7 @@ static void R_StudioLoadTexture( model_t *mod, const studiohdr_t *phdr, const ms
 	if( ptexture->flags & STUDIO_NF_NORMALMAP )
 		flags |= (TF_NORMALMAP);
 
-#if 0 // Useless feature in CSMoE, removed for optimization
-	// store some textures for remapping
-	if( !Q_strnicmp( ptexture->name, "DM_Base", 7 ) || !Q_strnicmp( ptexture->name, "remap", 5 ))
-	{
-		int	i;
-		char	val[6];
-		const byte	*pixels;
 
-		i = mod->numtextures;
-		mod->textures = (texture_t **)Mem_Realloc( mod->mempool, mod->textures, ( i + 1 ) * sizeof( texture_t* ));
-		size = ptexture->width * ptexture->height + 768;
-		tx = (texture_t *)Mem_ZeroAlloc( mod->mempool, sizeof( *tx ) + size );
-		mod->textures[i] = tx;
-
-		// parse ranges and store it
-		// HACKHACK: store ranges into anim_min, anim_max etc
-		if( !Q_strnicmp( ptexture->name, "DM_Base", 7 ))
-		{
-			Q_strncpy( tx->name, "DM_Base", sizeof( tx->name ));
-			tx->anim_min = PLATE_HUE_START; // topcolor start
-			tx->anim_max = PLATE_HUE_END; // topcolor end
-			// bottomcolor start always equal is (topcolor end + 1)
-			tx->anim_total = SUIT_HUE_END;// bottomcolor end 
-		}
-		else
-		{
-			Q_strncpy( tx->name, "DM_User", sizeof( tx->name ));	// custom remapped
-			Q_strncpy( val, ptexture->name + 7, 4 );  
-			tx->anim_min = bound( 0, Q_atoi( val ), 255 );	// topcolor start
-			Q_strncpy( val, ptexture->name + 11, 4 ); 
-			tx->anim_max = bound( 0, Q_atoi( val ), 255 );	// topcolor end
-			// bottomcolor start always equal is (topcolor end + 1)
-			Q_strncpy( val, ptexture->name + 15, 4 ); 
-			tx->anim_total = bound( 0, Q_atoi( val ), 255 );	// bottomcolor end
-		}
-
-		tx->width = ptexture->width;
-		tx->height = ptexture->height;
-
-		// the pixels immediately follow the structures
-		pixels = (const byte *)phdr + ptexture->index;
-        Mem_VirtualCopy( tx+1, pixels, size );
-
-		ptexture->flags |= STUDIO_NF_COLORMAP;	// yes, this is colormap image
-		flags |= TF_FORCE_COLOR;
-
-		mod->numtextures++;	// done
-	}
-#endif
 
 	Q_strncpy( mdlname, mod->name, sizeof( mdlname ));
 	FS_FileBase( ptexture->name, name );
