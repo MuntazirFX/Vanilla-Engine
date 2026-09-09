@@ -99,7 +99,7 @@ GNU General Public License for more details.
 #endif
 
 #ifdef XASH_BIG_ENDIAN
-#error "CSMoE won't support big-endian any further for better performance."
+#error "Vanilla Half-Life build does not support big-endian targets."
 #else
 #define LittleLong(x) (x)
 #define LittleLongSW(x)

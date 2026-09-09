@@ -205,14 +205,10 @@ hull_t *Mod_HullForStudio( model_t *model, float frame, int sequence, const vec3
 	mstudiocache_t	*bonecache;
 	mstudiobbox_t	*phitbox;
 	int		i, j;
-	qboolean bSkipShield = 0;
 
 	ASSERT( numhitboxes );
 
 	*numhitboxes = 0; // assume error
-
-	if((sv_skipshield->integer == 1 && pEdict && pEdict->v.gamestate == 1) || sv_skipshield->integer == 2)
-		bSkipShield = 1;
 
 	if( mod_studiocache->integer )
 	{
@@ -262,7 +258,7 @@ hull_t *Mod_HullForStudio( model_t *model, float frame, int sequence, const vec3
 	}
 
 	// tell trace code about hitbox count
-	*numhitboxes = (bSkipShield) ? mod_studiohdr->numhitboxes - 1 : mod_studiohdr->numhitboxes;
+	*numhitboxes = mod_studiohdr->numhitboxes;
 
 	if( mod_studiocache->integer )
 	{

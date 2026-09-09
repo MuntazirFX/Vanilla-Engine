@@ -3171,13 +3171,7 @@ model_t *Mod_LoadModel( model_t *mod, qboolean crash )
 
 		return NULL;
 	}
-#if 0 // MoeMod : CSMoE removed this feature
-	else if( clgame.drawFuncs.Mod_ProcessUserData != NULL )
-	{
-		// let the client.dll load custom data
-		clgame.drawFuncs.Mod_ProcessUserData( mod, true, buf );
-	}
-#endif
+
 
 	return mod;
 }
