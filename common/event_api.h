@@ -54,8 +54,6 @@ typedef struct event_api_s
 	const char *(*EV_SoundForIndex)(int index);
 	struct msurface_s *(*EV_TraceSurface)(int ground, const vec3_t vstart, const vec3_t vend);
 
-	// CSMoE extension
-	unsigned short(*EV_GetCurrentEventIndex)(void);
 } event_api_t;
 
 #endif
